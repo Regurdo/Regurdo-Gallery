@@ -1,0 +1,133 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* shadcn/ui token bridge */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* REGURDO palette */
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-gold: var(--gold);
+  --color-gold-deep: var(--gold-deep);
+  --color-ink: var(--ink);
+  --color-soft: var(--soft);
+  --color-muted-2: var(--muted-2);
+  --color-faint: var(--faint);
+
+  /* Typography — Cormorant Garamond (display) + Montserrat (UI) */
+  --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-cormorant), "Cormorant Garamond", Georgia, "Times New Roman", serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* The whole site is always dark — single palette, no theme toggle. */
+:root {
+  --radius: 0.25rem;
+
+  --background: #0b0b0b;
+  --foreground: #ece7df;
+
+  --surface: #141414;
+  --surface-2: #191919;
+  --line: #222222;
+  --line-strong: #2e2e2e;
+
+  --gold: #d4a95f;
+  --gold-deep: #a5813f;
+
+  --ink: #ece7df;
+  --soft: #c9c4bb;
+  --muted-2: #8f8b84;
+  --faint: #5e5a53;
+
+  --card: #141414;
+  --card-foreground: #ece7df;
+  --popover: #141414;
+  --popover-foreground: #ece7df;
+  --primary: #d4a95f;
+  --primary-foreground: #0b0b0b;
+  --secondary: #191919;
+  --secondary-foreground: #ece7df;
+  --muted: #191919;
+  --muted-foreground: #8f8b84;
+  --accent: #191919;
+  --accent-foreground: #ece7df;
+  --destructive: #c0554a;
+  --destructive-foreground: #fdf5f3;
+  --border: #222222;
+  --input: #262626;
+  --ring: #d4a95f;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    letter-spacing: 0.01em;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--gold) 75%, black);
+    color: #0b0b0b;
+  }
+}
+
+/* ---------- Reusable primitives ---------- */
+
+@layer components {
+  /* Small uppercase label with wide letter-spacing (e.g. "KOLEKSI", "KATALOG") */
+  .label-caps {
+    @apply font-sans text-[10px] font-semibold uppercase tracking-[0.24em] text-muted-2;
+  }
+  /* Gold button used across the app */
+  .btn-gold {
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-sm bg-gold px-5 font-sans text-[11px] font-semibold uppercase tracking-[0.18em] text-background transition-colors hover:bg-gold-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 disabled:pointer-events-none disabled:opacity-50;
+  }
+  /* Dark ghost button */
+  .btn-ghost-dark {
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-sm border border-line bg-surface px-5 font-sans text-[11px] font-semibold uppercase tracking-[0.18em] text-soft transition-colors hover:border-line-strong hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 disabled:pointer-events-none disabled:opacity-50;
+  }
+}
+
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility kbd {
+  @apply inline-flex min-w-6 items-center justify-center rounded-[3px] border border-line-strong bg-surface-2 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-soft;
+}
