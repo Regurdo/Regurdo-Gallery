@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useActionState, useRef, useState } from "react";
 import { ImagePlus, Loader2, RotateCcw } from "lucide-react";
 import type { PhotoFormState } from "@/lib/actions/photos";
+import { compressImage } from "@/lib/image-compress";
 import {
   CAMERA_PRESETS,
   LENS_PRESETS,
@@ -75,7 +76,10 @@ export function PhotoForm({
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(photo?.url ?? null);
   const [exifNote, setExifNote] = useState<string | null>(null);
+  const [compressing, setCompressing] = useState(false);
+  const [compressNote, setCompressNote] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const compressSeq = useRef(0);
   const cameraRef = useRef<HTMLInputElement>(null);
   const lensRef = useRef<HTMLInputElement>(null);
   const isoRef = useRef<HTMLInputElement>(null);
@@ -90,15 +94,58 @@ export function PhotoForm({
   /*
    * Preview lives in event handlers (no effect): picking a file revokes the
    * previous object URL (unless it is the stored photo URL) and mints a new one.
+   *
+   * Compression flow: the ORIGINAL file is shown + EXIF-read immediately,
+   * then compressImage runs in the background. When it succeeds, the file
+   * input is SWAPPED to the compressed file via DataTransfer (the input —
+   * not React state — is what the form actually submits) and the preview
+   * is refreshed so size/name always match what will be uploaded.
    */
   function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0] ?? null;
-    setFile(f);
+    const picked = e.target.files?.[0] ?? null;
+    setCompressNote(null);
+    if (!picked) {
+      compressSeq.current += 1; // cancel any in-flight compression
+      setCompressing(false);
+      setFile(null);
+      setPreview((prev) => {
+        if (prev && prev !== photo?.url) URL.revokeObjectURL(prev);
+        return photo?.url ?? null;
+      });
+      return;
+    }
+    setFile(picked);
     setPreview((prev) => {
       if (prev && prev !== photo?.url) URL.revokeObjectURL(prev);
-      return f ? URL.createObjectURL(f) : (photo?.url ?? null);
+      return URL.createObjectURL(picked);
     });
-    if (f) void autofillFromExif(f);
+    if (picked) void autofillFromExif(picked); // EXIF lives in the ORIGINAL
+    void compressPicked(picked);
+  }
+
+  async function compressPicked(original: File) {
+    const seq = ++compressSeq.current;
+    setCompressing(true);
+    try {
+      const res = await compressImage(original);
+      if (seq !== compressSeq.current) return; // user picked another file
+      if (res.compressed) {
+        const input = fileRef.current;
+        if (input) {
+          const dt = new DataTransfer();
+          dt.items.add(res.file);
+          input.files = dt.files; // the form now submits the compressed file
+        }
+        setFile(res.file);
+        setPreview((prev) => {
+          if (prev && prev !== photo?.url) URL.revokeObjectURL(prev);
+          return URL.createObjectURL(res.file);
+        });
+      }
+      setCompressNote(res.note);
+    } finally {
+      if (seq === compressSeq.current) setCompressing(false);
+    }
   }
 
   /*
@@ -158,6 +205,9 @@ export function PhotoForm({
   }
 
   function resetFile() {
+    compressSeq.current += 1; // cancel any in-flight compression
+    setCompressing(false);
+    setCompressNote(null);
     setFile(null);
     setPreview((prev) => {
       if (prev && prev !== photo?.url) URL.revokeObjectURL(prev);
@@ -210,7 +260,9 @@ export function PhotoForm({
             <ImagePlus className="size-7 text-faint" aria-hidden />
             <span className="font-sans text-xs text-soft">
               Klik untuk memilih foto
-              <span className="mt-1 block text-[10px] text-faint">JPG, PNG, WebP, AVIF · maks 10 MB</span>
+              <span className="mt-1 block text-[10px] text-faint">
+                JPG, PNG, WebP, AVIF · foto besar otomatis dikompres ≤ 1 MB
+              </span>
             </span>
           </button>
         )}
@@ -224,6 +276,15 @@ export function PhotoForm({
           >
             <RotateCcw className="size-3" /> Batalkan pilihan
           </button>
+        )}
+
+        {compressing && (
+          <p className="mt-1.5 flex items-center gap-1.5 font-sans text-[10px] leading-relaxed text-gold">
+            <Loader2 className="size-3 animate-spin" aria-hidden /> Mengompres foto…
+          </p>
+        )}
+        {!compressing && compressNote && (
+          <p className="mt-1.5 font-sans text-[10px] leading-relaxed text-gold">{compressNote}</p>
         )}
       </div>
 
@@ -370,13 +431,13 @@ export function PhotoForm({
         <div className="mt-8 flex items-center gap-3">
           <button
             type="submit"
-            disabled={pending}
+            disabled={pending || compressing}
             className="btn-gold inline-flex h-11 min-w-40 items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {pending ? (
+            {compressing || pending ? (
               <>
                 <Loader2 className="size-4 animate-spin" aria-hidden />
-                {mode === "upload" ? "Mengunggah…" : "Menyimpan…"}
+                {compressing ? "Mengompres…" : mode === "upload" ? "Mengunggah…" : "Menyimpan…"}
               </>
             ) : mode === "upload" ? (
               "Unggah Foto"
@@ -386,7 +447,7 @@ export function PhotoForm({
           </button>
           <p className="font-sans text-[10px] leading-relaxed text-faint">
             {mode === "upload"
-              ? "Foto langsung tampil di galeri setelah diunggah."
+              ? "Foto dikompres otomatis di browser sebelum dikirim."
               : "Perubahan langsung terlihat di galeri."}
           </p>
         </div>
