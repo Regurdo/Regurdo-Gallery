@@ -25,12 +25,12 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     title,
     description,
     openGraph: {
-      title: `${data.album.title} — Album REGURGO`,
+      title: `${data.album.title} — Album REGURDO`,
       description,
       type: "website",
     },
     twitter: {
-      title: `${data.album.title} — Album REGURGO`,
+      title: `${data.album.title} — Album REGURDO`,
       description,
     },
   };

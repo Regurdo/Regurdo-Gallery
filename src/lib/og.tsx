@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 /**
- * Shared Open Graph card renderer (1200x630 PNG) for REGURGO.
+ * Shared Open Graph card renderer (1200x630 PNG) for REGURDO.
  *
  * Used by the file-based metadata conventions (opengraph-image.tsx) of the
  * root layout, /galeri, /tentang and as the fallback for /album/[slug].
@@ -81,7 +81,7 @@ export function regurgoOgCard(
               letterSpacing: 12,
             }}
           >
-            REGURGO
+            REGURDO
           </div>
         </div>
 

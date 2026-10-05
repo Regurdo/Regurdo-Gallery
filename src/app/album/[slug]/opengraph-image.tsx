@@ -10,7 +10,7 @@ import { getAlbumBySlug } from "@/lib/queries";
  */
 export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
-export const alt = "Sampul album — REGURGO";
+export const alt = "Sampul album — REGURDO";
 export const revalidate = 3600;
 
 const GOLD = "#d4a95f";
@@ -27,7 +27,7 @@ export default async function Image({
 
   if (!data) {
     return regurgoOgCard(
-      "Album Regurgo",
+      "Album Regurdo",
       "Album",
       "Kumpulan karya fotografi",
       "Street · Architecture · Nature",
@@ -39,7 +39,7 @@ export default async function Image({
 
   if (!cover) {
     return regurgoOgCard(
-      "Album Regurgo",
+      "Album Regurdo",
       album.title,
       `${photos.length} foto — klik untuk melihat`,
       "Street · Architecture · Nature",
@@ -118,7 +118,7 @@ export default async function Image({
                 letterSpacing: 12,
               }}
             >
-              REGURGO
+              REGURDO
             </div>
           </div>
 
@@ -159,7 +159,7 @@ export default async function Image({
                 textTransform: "uppercase",
               }}
             >
-              {photos.length} Foto · Regurgo — Galeri Fotografi
+              {photos.length} Foto · Regurdo — Galeri Fotografi
             </div>
           </div>
         </div>
