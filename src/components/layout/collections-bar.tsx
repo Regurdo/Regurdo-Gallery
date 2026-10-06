@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { Bookmark, LayoutGrid, List } from "lucide-react";
+import { Bookmark, LayoutGrid, List, Orbit } from "lucide-react";
 import type { CategoryWithCount } from "@/lib/types";
 
 export type GaleriFilter = {
   q?: string;
   kategori?: string;
   tersimpan?: boolean;
-  view: "grid" | "list";
+  view: "grid" | "list" | "drift";
   /** Active photo slug in list view. */
   foto?: string;
 };
@@ -23,6 +23,8 @@ function buildHref(filter: GaleriFilter, overrides: Partial<GaleriFilter>, listF
   if (merged.tersimpan) sp.set("tersimpan", "1");
   if (merged.view === "grid") {
     sp.set("view", "grid");
+  } else if (merged.view === "drift") {
+    sp.set("view", "drift");
   } else {
     /* Film strip is the default view — only the active photo goes in the URL. */
     const foto = merged.foto ?? listFoto;
@@ -163,6 +165,18 @@ export function CollectionsBar({
             }`}
           >
             <LayoutGrid className="size-3.5" />
+          </Link>
+          <Link
+            href={buildHref(filter, { view: "drift", foto: undefined })}
+            aria-label="Mode drift"
+            aria-current={filter.view === "drift" ? "true" : undefined}
+            className={`grid size-8 place-items-center rounded-sm border transition-colors ${
+              filter.view === "drift"
+                ? "border-gold bg-gold text-background"
+                : "border-line bg-surface text-muted-2 hover:text-ink"
+            }`}
+          >
+            <Orbit className="size-3.5" />
           </Link>
         </div>
       </div>
