@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ImageOff, SearchX } from "lucide-react";
 import { CollectionsBar, type GaleriFilter } from "@/components/layout/collections-bar";
-import { GaleriDriftView } from "@/components/galeri/galeri-drift-view";
 import { GaleriListView } from "@/components/galeri/galeri-list-view";
 import { PhotoGrid } from "@/components/galeri/photo-grid";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -31,13 +30,12 @@ function first(v: string | string[] | undefined): string | undefined {
 
 export default async function GaleriPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
-  /* Film strip (list) is the default view — grid & drift must be requested explicitly. */
+  /* Film strip (list) is the default view — grid must be requested explicitly. */
   const filter: GaleriFilter = {
     q: first(sp.q),
     kategori: first(sp.kategori),
     tersimpan: first(sp.tersimpan) === "1",
-    view:
-      first(sp.view) === "grid" ? "grid" : first(sp.view) === "drift" ? "drift" : "list",
+    view: first(sp.view) === "grid" ? "grid" : "list",
     foto: first(sp.foto),
   };
 
@@ -80,12 +78,12 @@ export default async function GaleriPage({ searchParams }: { searchParams: Searc
   })();
 
   /*
-   * Film strip & drift = one full page: the wrapper is locked to the exact
-   * space below the sticky header (64px + 1px border) and clips overflow, so
-   * the whole view fits one screen with no page scroll — footer omitted,
+   * Film strip = one full page: the wrapper is locked to the exact space
+   * below the sticky header (64px + 1px border) and clips overflow, so the
+   * whole view fits one screen with no page scroll — footer omitted,
    * matching the reference site.
    */
-  const fullPage = filter.view !== "grid" && photos.length > 0;
+  const fullPage = filter.view === "list" && photos.length > 0;
 
   return (
     <div
@@ -122,8 +120,6 @@ export default async function GaleriPage({ searchParams }: { searchParams: Searc
           backHref={backHref}
           viewer={viewer}
         />
-      ) : filter.view === "drift" ? (
-        <GaleriDriftView photos={photos} viewer={viewer} />
       ) : (
         <PhotoGrid photos={photos} viewer={viewer} />
       )}
