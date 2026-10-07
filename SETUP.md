@@ -194,3 +194,28 @@ domain sendiri → troubleshooting) ada di **[DEPLOY.md](./DEPLOY.md)**.
 
 Migrasi database tidak perlu diulang saat deploy — database Supabase yang
 sama dipakai oleh versi lokal maupun produksi.
+
+## 11. PWA (installable app)
+
+The site is an installable Progressive Web App — visitors can add it to their
+home screen (Android/desktop: Chrome install icon; iOS: Share → Add to Home
+Screen) and browse cached photos while offline.
+
+Pieces:
+
+- `public/manifest.webmanifest` — app name, colors, and icons; linked from
+  `src/app/layout.tsx` (metadata + `themeColor` viewport).
+- `public/sw.js` — dependency-free service worker: network-first pages,
+  cache-first static assets, stale-while-revalidate images (300-entry cap),
+  offline fallback to `public/offline.html`. Registered by
+  `src/components/pwa/register-sw.tsx` (production builds only; updates
+  auto-reload the page).
+- `public/icons/*` + `src/app/icon.png` — generated from `public/logo.svg`
+  with `scripts/generate-pwa-icons.mjs`.
+
+To ship an icon/theme change, bump `CACHE_VERSION` in `public/sw.js` so
+clients pick up the new shell immediately, and regenerate icons with:
+
+```bash
+node scripts/generate-pwa-icons.mjs
+```

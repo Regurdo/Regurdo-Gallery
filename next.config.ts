@@ -63,6 +63,19 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "**.googleusercontent.com", pathname: "/**" },
     ],
   },
+  async headers() {
+    return [
+      {
+        // The service worker itself must never be cached hard, so updates
+        // (bump CACHE_VERSION in public/sw.js) reach visitors immediately.
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=0, must-revalidate" },
+          { key: "Service-Worker-Allowed", value: "/" },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
